@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fdf6ec">
+<title>Share | かんたんファイル共有</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='%23f7a8b8'/><circle cx='35' cy='50' r='9' fill='white'/><circle cx='66' cy='32' r='9' fill='white'/><circle cx='66' cy='68' r='9' fill='white'/><path d='M43 46 L58 36 M43 54 L58 64' stroke='white' stroke-width='6'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fdf6ec; --card:#ffffff; --ink:#4a3f35; --sub:#9a8a7a;
+    --pink:#f7a8b8; --pink-deep:#ee7f97; --mint:#a8dcc3; --sky:#a8cdea;
+    --cream:#fff3d6; --line:#f0e4d3; --danger:#e56b6b;
+    --radius:20px; --shadow:0 6px 24px rgba(180,140,90,.13);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:"M PLUS Rounded 1c",sans-serif; background:var(--bg); color:var(--ink);
+    min-height:100vh; padding:20px 16px 48px;
+    background-image:radial-gradient(circle at 12% 8%, #ffeef3 0, transparent 42%),radial-gradient(circle at 88% 20%, #e8f4ff 0, transparent 40%),radial-gradient(circle at 50% 100%, #eafaf1 0, transparent 45%);
+  }
+  .material-symbols-rounded{ font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; vertical-align:middle; user-select:none; }
+  .wrap{ max-width:520px; margin:0 auto; }
+  header{ text-align:center; padding:18px 0 6px; }
+  .logo-badge{
+    width:74px; height:74px; margin:0 auto 10px; border-radius:24px; background:var(--pink);
+    display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);
+  }
+  .logo-badge .material-symbols-rounded{ font-size:40px; color:#fff; font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 40; }
+  h1{ font-size:30px; font-weight:800; margin:0; letter-spacing:.04em; }
+  .tagline{ color:var(--sub); font-size:13.5px; margin:6px 0 0; font-weight:500; }
+  .screen{ display:none; animation:fadeUp .35s ease both; }
+  .screen.active{ display:block; }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:none;} }
+  .card{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-top:16px; }
+  .mode-card{ display:flex; gap:14px; align-items:center; width:100%; text-align:left; border:2px solid transparent; cursor:pointer; font-family:inherit; }
+  .mode-card:active{ transform:scale(.985); }
+  .mode-icon{ flex:none; width:54px; height:54px; border-radius:16px; display:flex; align-items:center; justify-content:center; }
+  .mode-icon .material-symbols-rounded{ font-size:29px; color:#fff; font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 29; }
+  .mi-pink{ background:var(--pink); } .mi-sky{ background:var(--sky); } .mi-mint{ background:var(--mint); }
+  .mode-card h2{ font-size:17.5px; margin:0 0 3px; font-weight:800; }
+  .mode-card p{ margin:0; font-size:12.5px; color:var(--sub); line-height:1.55; font-weight:500; }
+  .sec-title{ display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800; margin:24px 2px 0; }
+  .sec-title .material-symbols-rounded{ color:var(--pink-deep); }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    border:none; cursor:pointer; font-family:inherit; font-weight:800; font-size:15.5px;
+    border-radius:999px; padding:13px 26px; transition:transform .08s ease, opacity .2s;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:var(--pink-deep); color:#fff; box-shadow:0 6px 16px rgba(238,127,151,.35); }
+  .btn-ghost{ background:#fff; color:var(--ink); border:2px solid var(--line); }
+  .btn:disabled{ opacity:.45; pointer-events:none; }
+  .btn-wide{ width:100%; }
+  .back-btn{ display:inline-flex; align-items:center; gap:2px; background:none; border:none; cursor:pointer; font-family:inherit; font-weight:700; font-size:14px; color:var(--sub); padding:6px 0; margin-top:10px; }
+  .drop{
+    border:2.5px dashed #ecc9a8; border-radius:16px; background:#fffaf1; padding:26px 14px;
+    text-align:center; cursor:pointer;
+  }
+  .drop .material-symbols-rounded{ font-size:42px; color:#e0a458; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 42; }
+  .drop p{ margin:8px 0 0; font-size:13.5px; font-weight:700; }
+  .drop small{ color:var(--sub); font-weight:500; }
+  .file-list{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .file-row{ display:flex; align-items:center; gap:10px; background:#fdfaf5; border:1.5px solid var(--line); border-radius:13px; padding:9px 12px; font-size:13.5px; }
+  .file-row .material-symbols-rounded{ color:var(--pink-deep); flex:none; }
+  .file-row .fname{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700; }
+  .file-row .fsize{ color:var(--sub); font-size:12px; flex:none; font-weight:500; }
+  .file-row .fx{ background:none; border:none; cursor:pointer; color:var(--sub); padding:2px; display:flex; }
+  .code-big{ font-size:44px; font-weight:800; letter-spacing:.28em; text-align:center; margin:8px 0 2px; color:var(--ink); text-indent:.28em; }
+  .qr-box{ display:flex; justify-content:center; padding:10px 0 2px; }
+  .qr-box svg{ width:176px; height:176px; }
+  .link-row{ display:flex; gap:8px; margin-top:12px; }
+  .link-row input{ flex:1; min-width:0; border:2px solid var(--line); border-radius:12px; padding:11px 12px; font-family:inherit; font-size:12.5px; color:var(--ink); background:#fdfaf5; }
+  .icon-btn{ flex:none; width:46px; height:46px; border-radius:12px; border:2px solid var(--line); background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--ink); }
+  .status{ display:flex; align-items:center; gap:9px; justify-content:center; margin-top:14px; font-size:13.5px; font-weight:700; color:var(--sub); }
+  .pulse{ width:10px; height:10px; border-radius:50%; background:var(--pink-deep); animation:pulse 1.3s ease infinite; }
+  @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(238,127,151,.45);} 70%{ box-shadow:0 0 0 9px rgba(238,127,151,0);} 100%{ box-shadow:0 0 0 0 rgba(238,127,151,0);} }
+  .code-input{
+    width:100%; font-family:inherit; font-size:30px; font-weight:800; letter-spacing:.3em; text-indent:.3em;
+    text-align:center; border:2.5px solid var(--line); border-radius:16px; padding:13px 8px; color:var(--ink); background:#fdfaf5; outline:none;
+  }
+  .code-input:focus{ border-color:var(--pink); background:#fff; }
+  .text-input{
+    width:100%; font-family:inherit; font-size:16px; font-weight:700; border:2.5px solid var(--line);
+    border-radius:14px; padding:12px 14px; color:var(--ink); background:#fdfaf5; outline:none;
+  }
+  .text-input:focus{ border-color:var(--pink); background:#fff; }
+  label.flabel{ display:block; font-size:12.5px; font-weight:800; color:var(--sub); margin:14px 0 6px; }
+  .progress{ height:10px; border-radius:99px; background:#f6ead9; overflow:hidden; margin-top:8px; }
+  .progress > div{ height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,var(--pink),var(--pink-deep)); transition:width .18s ease; }
+  .member-row{ display:flex; align-items:center; gap:11px; padding:11px 6px; border-bottom:1.5px solid var(--line); }
+  .member-row:last-child{ border-bottom:none; }
+  .avatar{ flex:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; }
+  .avatar .material-symbols-rounded{ font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24; }
+  .member-row .mname{ flex:1; font-weight:800; font-size:15px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .send-chip{ flex:none; border:none; cursor:pointer; font-family:inherit; font-weight:800; font-size:13px; color:#fff; background:var(--sky); padding:9px 16px; border-radius:999px; display:inline-flex; align-items:center; gap:5px; }
+  .send-chip .material-symbols-rounded{ font-size:17px; }
+  .notice{ background:var(--cream); border-radius:14px; padding:12px 14px; font-size:12.5px; line-height:1.65; font-weight:500; color:#7a6748; margin-top:16px; display:flex; gap:9px; }
+  .notice .material-symbols-rounded{ flex:none; color:#d9a441; margin-top:1px; }
+  .error-box{ display:none; background:#fdeeee; color:#b03a3a; border-radius:14px; padding:12px 14px; font-size:13.5px; font-weight:700; margin-top:14px; line-height:1.6; }
+  .error-box.show{ display:block; }
+  .done-icon{ text-align:center; padding:8px 0 2px; }
+  .done-icon .material-symbols-rounded{ font-size:62px; color:#7cc79b; font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 62; }
+  .center{ text-align:center; }
+  .muted{ color:var(--sub); font-size:12.5px; font-weight:500; line-height:1.6; }
+  footer{ text-align:center; margin-top:34px; color:var(--sub); font-size:11.5px; font-weight:500; line-height:1.7; }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-badge"><span class="material-symbols-rounded">share</span></div>
+    <h1>Share</h1>
+    <p class="tagline">ログインなしで、端末どうしでファイルを送れるよ</p>
+  </header>
+
+  <!-- ホーム -->
+  <section id="scr-home" class="screen active">
+    <div class="sec-title"><span class="material-symbols-rounded">send</span>ファイルを送る</div>
+    <button class="card mode-card" id="go-send-code">
+      <span class="mode-icon mi-pink"><span class="material-symbols-rounded">pin</span></span>
+      <span><h2>コードで送る</h2><p>6桁のコードを相手に伝えるだけ。相手はコードを入れて受け取るよ。</p></span>
+    </button>
+    <button class="card mode-card" id="go-room">
+      <span class="mode-icon mi-sky"><span class="material-symbols-rounded">groups</span></span>
+      <span><h2>部屋で送る</h2><p>同じ部屋に入った端末どうしで、その場で直接送り合えるよ。</p></span>
+    </button>
+    <div class="sec-title"><span class="material-symbols-rounded">download</span>ファイルを受け取る</div>
+    <div class="card">
+      <p class="muted" style="margin:0 0 10px;">送る人から聞いた6桁コードを入れてね。</p>
+      <input id="recv-code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+      <div style="height:12px"></div>
+      <button class="btn btn-primary btn-wide" id="recv-btn"><span class="material-symbols-rounded">download</span>受け取る</button>
+      <div class="error-box" id="recv-error"></div>
+    </div>
+    <div class="notice"><span class="material-symbols-rounded">info</span><span>ファイルはサーバーに保存されず、端末どうしで直接届くよ。送る間は、両方の端末でこのページを開いたままにしておいてね。</span></div>
+  </section>
+
+  <!-- コードで送る -->
+  <section id="scr-send" class="screen">
+    <button class="back-btn" data-back><span class="material-symbols-rounded">arrow_back</span>もどる</button>
+    <div class="card" id="send-step1">
+      <div class="drop" id="drop">
+        <span class="material-symbols-rounded">upload_file</span>
+        <p>タップしてファイルを選ぶ</p>
+        <small>写真・動画・文書なんでもOK（複数えらべるよ）</small>
+      </div>
+      <input type="file" id="file-input" multiple hidden>
+      <div class="file-list" id="send-file-list"></div>
+      <div style="height:16px"></div>
+      <button class="btn btn-primary btn-wide" id="make-code-btn" disabled><span class="material-symbols-rounded">pin</span>コードを作る</button>
+      <div class="error-box" id="send-error"></div>
+    </div>
+    <div class="card hidden" id="send-step2">
+      <p class="center muted" style="margin:0;">このコードを相手に伝えてね</p>
+      <div class="code-big" id="send-code-text">------</div>
+      <div class="qr-box" id="send-qr"></div>
+      <div class="link-row">
+        <input id="send-link" readonly>
+        <button class="icon-btn" id="copy-link-btn" title="リンクをコピー"><span class="material-symbols-rounded">content_copy</span></button>
+      </div>
+      <div class="status"><span class="pulse"></span><span id="send-status">相手の接続を待っているよ…</span></div>
+      <div class="file-list" id="send-progress-list"></div>
+      <div style="height:14px"></div>
+      <button class="btn btn-ghost btn-wide" id="send-cancel-btn">やめる</button>
+    </div>
+    <div class="card hidden" id="send-done">
+      <div class="done-icon"><span class="material-symbols-rounded">check_circle</span></div>
+      <p class="center" style="font-weight:800; font-size:17px; margin:4px 0;">送信が終わったよ</p>
+      <p class="center muted">相手に届いたよ。おつかれさま。</p>
+      <div style="height:10px"></div>
+      <button class="btn btn-primary btn-wide" data-back>ホームへもどる</button>
+    </div>
+  </section>
+
+  <!-- 受け取る（接続後） -->
+  <section id="scr-recv" class="screen">
+    <button class="back-btn" data-back><span class="material-symbols-rounded">arrow_back</span>もどる</button>
+    <div class="card">
+      <p style="font-weight:800; font-size:16.5px; margin:0 0 4px;" id="recv-title">接続中…</p>
+      <p class="muted" style="margin:0;" id="recv-sub">相手を探しているよ。</p>
+      <div class="file-list" id="recv-file-list"></div>
+      <div class="error-box" id="recv2-error"></div>
+      <div style="height:14px"></div>
+      <button class="btn btn-ghost btn-wide" data-back>やめる</button>
+    </div>
+  </section>
+
+  <!-- 部屋 -->
+  <section id="scr-room" class="screen">
+    <button class="back-btn" data-back><span class="material-symbols-rounded">arrow_back</span>もどる</button>
+    <div class="card" id="room-entry">
+      <label class="flabel" style="margin-top:0;">あなたの名前（部屋の中で表示されるよ）</label>
+      <input id="room-name" class="text-input" maxlength="20">
+      <div style="height:18px"></div>
+      <button class="btn btn-primary btn-wide" id="room-create-btn"><span class="material-symbols-rounded">add_circle</span>新しい部屋を作る</button>
+      <div class="center muted" style="margin:14px 0 10px;">— または —</div>
+      <label class="flabel" style="margin-top:0;">部屋のコード（4桁）</label>
+      <input id="room-join-code" class="code-input" inputmode="numeric" maxlength="4" placeholder="0000" style="font-size:24px;">
+      <div style="height:12px"></div>
+      <button class="btn btn-ghost btn-wide" id="room-join-btn"><span class="material-symbols-rounded">login</span>部屋に入る</button>
+      <div class="error-box" id="room-error"></div>
+    </div>
+    <div class="card hidden" id="room-main">
+      <p class="center muted" style="margin:0;">部屋のコード</p>
+      <div class="code-big" id="room-code-text" style="font-size:36px;">----</div>
+      <p class="center muted" id="room-me" style="margin:0;"></p>
+      <div class="status"><span class="pulse"></span><span>部屋にいる端末</span></div>
+      <div id="member-list"></div>
+      <p class="center muted" id="room-empty">まだ誰もいないよ。コードを伝えて入ってもらってね。</p>
+      <div class="file-list" id="room-transfer-list"></div>
+      <div class="error-box" id="room2-error"></div>
+      <div style="height:14px"></div>
+      <button class="btn btn-ghost btn-wide" id="room-leave-btn">部屋を出る</button>
+    </div>
+    <input type="file" id="room-file-input" multiple hidden>
+  </section>
+
+  <footer>Share — 端末どうしの直接通信でファイルを送るアプリ<br>ファイルがサーバーに残ることはないよ</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+'use strict';
+/* ============ 共通 ============ */
+const $ = (s) => document.querySelector(s);
+const PREFIX_CODE = 'slashshare-code-';
+const PREFIX_ROOM = 'slashshare-room-';
+const CHUNK = 64 * 1024;
+
+let peer = null;            // 現在のPeer
+let flow = null;            // 'send-code' | 'receive' | 'room'
+let peerErrorHandler = null;
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  $('#' + id).classList.add('active');
+  window.scrollTo({ top: 0 });
+}
+function showError(boxId, msg){
+  const box = $('#' + boxId);
+  box.textContent = msg;
+  box.classList.add('show');
+}
+function hideError(boxId){ $('#' + boxId).classList.remove('show'); }
+function fmtSize(n){
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  if (n < 1024 * 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+  return (n / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+}
+function fileIcon(type, name){
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  if (type.startsWith('image/')) return 'image';
+  if (type.startsWith('video/')) return 'movie';
+  if (type.startsWith('audio/')) return 'music_note';
+  if (ext === 'pdf') return 'picture_as_pdf';
+  if (['zip','rar','7z','tar','gz'].includes(ext)) return 'folder_zip';
+  return 'description';
+}
+function randDigits(n){
+  let s = '';
+  for (let i = 0; i < n; i++) s += Math.floor(Math.random() * 10);
+  return s;
+}
+function randId(n){
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+  let s = '';
+  for (let i = 0; i < n; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+function destroyPeer(){
+  if (peer){ try { peer.destroy(); } catch(e){} peer = null; }
+  peerErrorHandler = null;
+}
+function makePeer(id){
+  return new Promise((resolve, reject) => {
+    destroyPeer();
+    const p = id ? new Peer(id) : new Peer();
+    let settled = false;
+    p.on('open', () => { if (!settled){ settled = true; peer = p; resolve(p); } });
+    p.on('error', (err) => {
+      if (!settled){ settled = true; reject(err); return; }
+      if (peerErrorHandler) peerErrorHandler(err);
+    });
+    setTimeout(() => { if (!settled){ settled = true; reject(new Error('timeout')); } }, 20000);
+  });
+}
+function goHome(){
+  destroyPeer();
+  flow = null;
+  resetSendUI(); resetRecvUI(); resetRoomUI();
+  showScreen('scr-home');
+}
+document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', goHome));
+
+/* ============ ファイル転送プロトコル ============ */
+// 送る側: conn の open 後に呼ぶ。files は File の配列。
+async function sendFilesOver(conn, files, ui){
+  const list = files.map((f, i) => ({ id: i, name: f.name, size: f.size, type: f.type || 'application/octet-stream' }));
+  conn.send({ t: 'files', files: list });
+  for (const meta of list){
+    const file = files[meta.id];
+    ui.onStart(meta);
+    conn.send({ t: 'file-start', id: meta.id });
+    let offset = 0;
+    while (offset < file.size){
+      const dc = conn.dataChannel;
+      if (dc && dc.bufferedAmount > 4 * 1024 * 1024){
+        await new Promise(r => setTimeout(r, 60));
+        continue;
+      }
+      const buf = await file.slice(offset, offset + CHUNK).arrayBuffer();
+      conn.send(buf);
+      offset += buf.byteLength;
+      ui.onProgress(meta, offset);
+    }
+    conn.send({ t: 'file-end', id: meta.id });
+    ui.onDone(meta);
+  }
+  conn.send({ t: 'all-done' });
+}
+
+// 受ける側: conn に対して受信処理を登録する。ui は {onList, onStart, onProgress, onFile, onAllDone, onClose}
+function receiveFilesOver(conn, ui){
+  let metas = [];
+  let current = null;
+  conn.on('data', (data) => {
+    if (data instanceof ArrayBuffer){
+      if (!current) return;
+      current.parts.push(data);
+      current.received += data.byteLength;
+      ui.onProgress(current.meta, current.received);
+      return;
+    }
+    if (!data || typeof data !== 'object') return;
+    if (data.t === 'files'){
+      metas = data.files;
+      ui.onList(metas);
+    } else if (data.t === 'file-start'){
+      const meta = metas.find(m => m.id === data.id) || { id: data.id, name: 'ファイル', size: 0 };
+      current = { meta, parts: [], received: 0 };
+      ui.onStart(meta);
+    } else if (data.t === 'file-end'){
+      if (!current) return;
+      const blob = new Blob(current.parts, { type: current.meta.type || 'application/octet-stream' });
+      ui.onFile(current.meta, blob);
+      current = null;
+    } else if (data.t === 'all-done'){
+      ui.onAllDone();
+    }
+  });
+  conn.on('close', () => { if (ui.onClose) ui.onClose(); });
+}
+
+/* ============ コードで送る ============ */
+let sendFiles = [];
+const dropEl = $('#drop'), fileInput = $('#file-input');
+
+$('#go-send-code').addEventListener('click', () => { showScreen('scr-send'); });
+dropEl.addEventListener('click', () => fileInput.click());
+dropEl.addEventListener('dragover', (e) => { e.preventDefault(); });
+dropEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  addSendFiles([...e.dataTransfer.files]);
+});
+fileInput.addEventListener('change', () => { addSendFiles([...fileInput.files]); fileInput.value = ''; });
+
+function addSendFiles(files){
+  sendFiles = sendFiles.concat(files);
+  renderSendFileList();
+}
+function renderSendFileList(){
+  const box = $('#send-file-list');
+  box.innerHTML = '';
+  sendFiles.forEach((f, i) => {
+    const row = document.createElement('div');
+    row.className = 'file-row';
+    row.innerHTML = '<span class="material-symbols-rounded">' + fileIcon(f.type, f.name) + '</span>' +
+      '<span class="fname"></span><span class="fsize">' + fmtSize(f.size) + '</span>' +
+      '<button class="fx" aria-label="外す"><span class="material-symbols-rounded">close</span></button>';
+    row.querySelector('.fname').textContent = f.name;
+    row.querySelector('.fx').addEventListener('click', () => { sendFiles.splice(i, 1); renderSendFileList(); });
+    box.appendChild(row);
+  });
+  $('#make-code-btn').disabled = sendFiles.length === 0;
+}
+function resetSendUI(){
+  sendFiles = [];
+  renderSendFileList();
+  $('#send-step1').classList.remove('hidden');
+  $('#send-step2').classList.add('hidden');
+  $('#send-done').classList.add('hidden');
+  hideError('send-error');
+}
+
+$('#make-code-btn').addEventListener('click', async () => {
+  hideError('send-error');
+  $('#make-code-btn').disabled = true;
+  let code = null, lastErr = null;
+  for (let attempt = 0; attempt < 5 && !code; attempt++){
+    const candidate = randDigits(6);
+    try {
+      await makePeer(PREFIX_CODE + candidate);
+      code = candidate;
+    } catch (e) {
+      lastErr = e;
+      if (e.type !== 'unavailable-id') break;
+    }
+  }
+  $('#make-code-btn').disabled = false;
+  if (!code){
+    showError('send-error', 'コードを作れませんでした。通信環境を確認してもう一度試してください。');
+    return;
+  }
+  flow = 'send-code';
+  $('#send-step1').classList.add('hidden');
+  $('#send-step2').classList.remove('hidden');
+  $('#send-code-text').textContent = code;
+  const link = location.origin + location.pathname + '?c=' + code;
+  $('#send-link').value = link;
+  const qrBox = $('#send-qr');
+  qrBox.innerHTML = '';
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(link);
+    qr.make();
+    qrBox.innerHTML = qr.createSvgTag(4, 8);
+  } catch (e) { qrBox.innerHTML = ''; }
+  $('#send-status').textContent = '相手の接続を待っているよ…';
+  $('#send-progress-list').innerHTML = '';
+
+  peer.on('connection', (conn) => {
+    conn.on('open', async () => {
+      $('#send-status').textContent = 'つながったよ。送信しているよ…';
+      const rows = {};
+      const ui = {
+        onStart(meta){
+          const row = document.createElement('div');
+          row.className = 'file-row';
+          row.innerHTML = '<span class="material-symbols-rounded">' + fileIcon(meta.type, meta.name) + '</span><span class="fname"></span><span class="fsize">0%</span>';
+          row.querySelector('.fname').textContent = meta.name;
+          $('#send-progress-list').appendChild(row);
+          rows[meta.id] = row;
+        },
+        onProgress(meta, sent){
+          const row = rows[meta.id];
+          if (row) row.querySelector('.fsize').textContent = Math.floor(sent / meta.size * 100) + '%';
+        },
+        onDone(meta){
+          const row = rows[meta.id];
+          if (row) row.querySelector('.fsize').textContent = '完了';
+        }
+      };
+      try {
+        await sendFilesOver(conn, sendFiles, ui);
+        $('#send-step2').classList.add('hidden');
+        $('#send-done').classList.remove('hidden');
+      } catch (e) {
+        $('#send-status').textContent = '送信が中断されました。';
+      }
+    });
+  });
+  peerErrorHandler = () => {};
+});
+$('#copy-link-btn').addEventListener('click', async () => {
+  const input = $('#send-link');
+  try { await navigator.clipboard.writeText(input.value); }
+  catch (e) { input.select(); document.execCommand('copy'); }
+  $('#copy-link-btn').innerHTML = '<span class="material-symbols-rounded">check</span>';
+  setTimeout(() => { $('#copy-link-btn').innerHTML = '<span class="material-symbols-rounded">content_copy</span>'; }, 1500);
+});
+$('#send-cancel-btn').addEventListener('click', goHome);
+
+/* ============ コードで受け取る ============ */
+function resetRecvUI(){
+  hideError('recv-error'); hideError('recv2-error');
+}
+$('#recv-btn').addEventListener('click', () => {
+  const code = $('#recv-code').value.trim();
+  if (!/^\d{6}$/.test(code)){
+    showError('recv-error', '6桁のコードを入れてね。');
+    return;
+  }
+  startReceive(code);
+});
+async function startReceive(code){
+  hideError('recv-error');
+  showScreen('scr-recv');
+  $('#recv-title').textContent = '接続中…';
+  $('#recv-sub').textContent = 'コード ' + code + ' の相手を探しているよ。';
+  $('#recv-file-list').innerHTML = '';
+  hideError('recv2-error');
+  flow = 'receive';
+  try {
+    await makePeer(PREFIX_CODE + 'recv-' + randId(10));
+  } catch (e) {
+    showError('recv2-error', '通信の準備ができませんでした。通信環境を確認してください。');
+    return;
+  }
+  let failed = false;
+  peerErrorHandler = (err) => {
+    if (err.type === 'peer-unavailable' && !failed){
+      failed = true;
+      $('#recv-title').textContent = '相手が見つかりませんでした';
+      $('#recv-sub').textContent = 'コードが違うか、相手がページを閉じています。';
+      showError('recv2-error', '相手が見つかりませんでした。コードを確認して、相手がページを開いたままにしているか聞いてみてね。');
+    }
+  };
+  const conn = peer.connect(PREFIX_CODE + code, { reliable: true, metadata: { kind: 'file' } });
+  setupReceiveConn(conn, '相手');
+}
+function setupReceiveConn(conn, fromLabel){
+  const rows = {};
+  receiveFilesOver(conn, {
+    onList(metas){
+      $('#recv-title').textContent = fromLabel + 'から受け取り中';
+      $('#recv-sub').textContent = metas.length + '個のファイルが届くよ。';
+    },
+    onStart(meta){
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = '<span class="material-symbols-rounded">' + fileIcon(meta.type, meta.name) + '</span><span class="fname"></span><span class="fsize">0%</span>';
+      row.querySelector('.fname').textContent = meta.name;
+      $('#recv-file-list').appendChild(row);
+      rows[meta.id] = row;
+    },
+    onProgress(meta, received){
+      const row = rows[meta.id];
+      if (row && meta.size) row.querySelector('.fsize').textContent = Math.floor(received / meta.size * 100) + '%';
+    },
+    onFile(meta, blob){
+      const row = rows[meta.id];
+      if (!row) return;
+      row.querySelector('.fsize').textContent = '完了';
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = meta.name;
+      a.className = 'send-chip';
+      a.style.background = 'var(--pink-deep)';
+      a.innerHTML = '<span class="material-symbols-rounded">download</span>保存';
+      row.appendChild(a);
+      try { a.click(); } catch (e) {}
+    },
+    onAllDone(){
+      $('#recv-title').textContent = '受け取りが終わったよ';
+      $('#recv-sub').textContent = '「保存」ボタンから端末に保存してね。';
+    },
+    onClose(){}
+  });
+}
+// リンク（?c=コード）で開かれたら自動で受け取り画面へ
+(function(){
+  const c = new URLSearchParams(location.search).get('c');
+  if (c && /^\d{6}$/.test(c)){
+    $('#recv-code').value = c;
+    startReceive(c);
+  }
+})();
+
+/* ============ 部屋で送る ============ */
+let myName = '';
+let isHost = false;
+let roomConns = new Map();   // ホスト用: peerId -> {conn, name}
+let hostConn = null;         // 参加者用: ホストへの接続
+let lastMembers = [];        // 最後に受け取ったメンバーリスト
+let roomTarget = null;       // 送信先のpeerId
+
+const NAME_A = ['はやい','のんびり','あかるい','しずかな','げんきな','やさしい'];
+const NAME_B = ['ねこ','うさぎ','ぱんだ','きつね','ぺんぎん','たぬき'];
+$('#room-name').value = NAME_A[Math.floor(Math.random() * NAME_A.length)] + NAME_B[Math.floor(Math.random() * NAME_B.length)];
+
+$('#go-room').addEventListener('click', () => { showScreen('scr-room'); });
+function resetRoomUI(){
+  isHost = false; roomConns = new Map(); hostConn = null; lastMembers = []; roomTarget = null;
+  $('#room-entry').classList.remove('hidden');
+  $('#room-main').classList.add('hidden');
+  hideError('room-error'); hideError('room2-error');
+}
+function avatarColor(id){
+  const colors = ['#f7a8b8','#a8cdea','#a8dcc3','#f2c94c','#c3a6e8','#f5a97f'];
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return colors[h % colors.length];
+}
+function nameOf(id){
+  const m = lastMembers.find(m => m.id === id);
+  return m ? m.name : '相手';
+}
+function enterRoomMain(code){
+  $('#room-entry').classList.add('hidden');
+  $('#room-main').classList.remove('hidden');
+  $('#room-code-text').textContent = code;
+  $('#room-me').textContent = 'あなたは「' + myName + '」だよ';
+  $('#room-transfer-list').innerHTML = '';
+  hideError('room2-error');
+}
+function renderMembers(list){
+  lastMembers = list;
+  const box = $('#member-list');
+  box.innerHTML = '';
+  const others = list.filter(m => m.id !== peer.id);
+  $('#room-empty').style.display = others.length ? 'none' : '';
+  for (const m of others){
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    row.innerHTML = '<span class="avatar" style="background:' + avatarColor(m.id) + '"><span class="material-symbols-rounded">person</span></span><span class="mname"></span>';
+    row.querySelector('.mname').textContent = m.name;
+    const chip = document.createElement('button');
+    chip.className = 'send-chip';
+    chip.innerHTML = '<span class="material-symbols-rounded">send</span>送る';
+    chip.addEventListener('click', () => { roomTarget = m.id; $('#room-file-input').click(); });
+    row.appendChild(chip);
+    box.appendChild(row);
+  }
+}
+function broadcastMembers(){
+  const list = [{ id: peer.id, name: myName }];
+  roomConns.forEach((v, id) => list.push({ id, name: v.name }));
+  roomConns.forEach((v) => { try { v.conn.send({ t: 'members', list }); } catch (e) {} });
+  renderMembers(list);
+}
+function routeConn(conn){
+  const kind = conn.metadata && conn.metadata.kind;
+  if (kind === 'room' && isHost){
+    conn.on('open', () => {
+      roomConns.set(conn.peer, { conn, name: (conn.metadata.name || 'ゲスト').slice(0, 20) });
+      broadcastMembers();
+    });
+    conn.on('close', () => { roomConns.delete(conn.peer); broadcastMembers(); });
+    return;
+  }
+  if (kind === 'file'){
+    conn.on('open', () => {
+      const from = nameOf(conn.peer);
+      receiveFilesOver(conn, roomReceiveUI(from));
+    });
+  }
+}
+function roomReceiveUI(from){
+  const rows = {};
+  const box = $('#room-transfer-list');
+  return {
+    onList(metas){
+      const head = document.createElement('p');
+      head.className = 'muted';
+      head.textContent = from + 'さんから ' + metas.length + '個のファイルが届くよ';
+      box.appendChild(head);
+    },
+    onStart(meta){
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = '<span class="material-symbols-rounded">' + fileIcon(meta.type, meta.name) + '</span><span class="fname"></span><span class="fsize">0%</span>';
+      row.querySelector('.fname').textContent = meta.name;
+      box.appendChild(row);
+      rows[meta.id] = row;
+    },
+    onProgress(meta, received){
+      const row = rows[meta.id];
+      if (row && meta.size) row.querySelector('.fsize').textContent = Math.floor(received / meta.size * 100) + '%';
+    },
+    onFile(meta, blob){
+      const row = rows[meta.id];
+      if (!row) return;
+      row.querySelector('.fsize').textContent = '完了';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = meta.name;
+      a.className = 'send-chip';
+      a.style.background = 'var(--pink-deep)';
+      a.innerHTML = '<span class="material-symbols-rounded">download</span>保存';
+      row.appendChild(a);
+      try { a.click(); } catch (e) {}
+    },
+    onAllDone(){},
+    onClose(){}
+  };
+}
+$('#room-file-input').addEventListener('change', async (e) => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  if (!files.length || !roomTarget) return;
+  const targetName = nameOf(roomTarget);
+  const conn = peer.connect(roomTarget, { reliable: true, metadata: { kind: 'file' } });
+  const rows = {};
+  const box = $('#room-transfer-list');
+  conn.on('open', async () => {
+    const ui = {
+      onStart(meta){
+        const row = document.createElement('div');
+        row.className = 'file-row';
+        row.innerHTML = '<span class="material-symbols-rounded">' + fileIcon(meta.type, meta.name) + '</span><span class="fname"></span><span class="fsize">0%</span>';
+        row.querySelector('.fname').textContent = meta.name + '（→ ' + targetName + '）';
+        box.appendChild(row);
+        rows[meta.id] = row;
+      },
+      onProgress(meta, sent){
+        const row = rows[meta.id];
+        if (row) row.querySelector('.fsize').textContent = Math.floor(sent / meta.size * 100) + '%';
+      },
+      onDone(meta){
+        const row = rows[meta.id];
+        if (row) row.querySelector('.fsize').textContent = '完了';
+      }
+    };
+    try { await sendFilesOver(conn, files, ui); }
+    catch (err) { showError('room2-error', '送信が中断されました。'); }
+  });
+});
+$('#room-create-btn').addEventListener('click', async () => {
+  hideError('room-error');
+  myName = ($('#room-name').value.trim() || 'ゲスト').slice(0, 20);
+  let code = null;
+  for (let attempt = 0; attempt < 5 && !code; attempt++){
+    const candidate = randDigits(4);
+    try { await makePeer(PREFIX_ROOM + candidate); code = candidate; }
+    catch (e) { if (e.type !== 'unavailable-id') break; }
+  }
+  if (!code){
+    showError('room-error', '部屋を作れませんでした。通信環境を確認してもう一度試してください。');
+    return;
+  }
+  flow = 'room'; isHost = true;
+  peer.on('connection', routeConn);
+  peerErrorHandler = () => {};
+  enterRoomMain(code);
+  renderMembers([{ id: peer.id, name: myName }]);
+});
+$('#room-join-btn').addEventListener('click', async () => {
+  hideError('room-error');
+  const code = $('#room-join-code').value.trim();
+  if (!/^\d{4}$/.test(code)){
+    showError('room-error', '部屋のコードは4桁だよ。');
+    return;
+  }
+  myName = ($('#room-name').value.trim() || 'ゲスト').slice(0, 20);
+  try {
+    await makePeer(PREFIX_ROOM + 'm-' + randId(10));
+  } catch (e) {
+    showError('room-error', '通信の準備ができませんでした。通信環境を確認してください。');
+    return;
+  }
+  flow = 'room'; isHost = false;
+  peer.on('connection', routeConn);
+  let failed = false;
+  peerErrorHandler = (err) => {
+    if (err.type === 'peer-unavailable' && !failed){
+      failed = true;
+      showError('room-error', '部屋が見つかりませんでした。コードを確認してね。');
+      destroyPeer();
+    }
+  };
+  hostConn = peer.connect(PREFIX_ROOM + code, { reliable: true, metadata: { kind: 'room', name: myName } });
+  hostConn.on('open', () => { enterRoomMain(code); });
+  hostConn.on('data', (d) => { if (d && d.t === 'members') renderMembers(d.list); });
+  hostConn.on('close', () => {
+    if (flow === 'room') showError('room2-error', '部屋が閉じられました。');
+  });
+});
+$('#room-leave-btn').addEventListener('click', goHome);
+</script>
+</body>
+</html>

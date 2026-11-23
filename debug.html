@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share debug</title>
+<style>body{font-family:monospace;font-size:13px;padding:12px}pre{background:#111;color:#0f0;padding:10px;white-space:pre-wrap;word-break:break-all;height:55vh;overflow:auto}button{padding:10px 14px;margin:4px;font-size:15px}input{padding:10px;font-size:15px;width:120px}</style>
+</head>
+<body>
+<h1>PeerJS debug</h1>
+<div>
+  <button id="btn-host">1. ホストになる（コード発行）</button>
+  <span id="code-out" style="font-size:20px;font-weight:bold"></span>
+</div>
+<div>
+  <input id="join-code" inputmode="numeric" placeholder="6桁コード">
+  <button id="btn-join">2. 参加する</button>
+</div>
+<pre id="log"></pre>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const logEl = document.getElementById('log');
+function log(){
+  const s = [...arguments].map(a => { try { return typeof a === 'string' ? a : JSON.stringify(a); } catch(e){ return String(a); } }).join(' ');
+  logEl.textContent += new Date().toISOString().slice(11,19) + ' ' + s + '\n';
+  logEl.scrollTop = logEl.scrollHeight;
+}
+log('UA: ' + navigator.userAgent);
+let peer = null;
+function watchConn(conn, label){
+  log(label, 'watchConn peer=' + conn.peer);
+  conn.on('open', () => log(label, 'conn OPEN'));
+  conn.on('data', d => log(label, 'conn DATA', (d && d.t) ? d.t : typeof d));
+  conn.on('close', () => log(label, 'conn CLOSE'));
+  conn.on('error', e => log(label, 'conn ERROR', e && e.type, e && e.message));
+  conn.on('iceStateChanged', s => log(label, 'iceStateChanged', s));
+  const pc = conn.peerConnection;
+  if (pc){
+    pc.addEventListener('iceconnectionstatechange', () => log(label, 'pc.iceConnectionState', pc.iceConnectionState));
+    pc.addEventListener('connectionstatechange', () => log(label, 'pc.connectionState', pc.connectionState));
+    pc.addEventListener('icecandidate', e => { if (e.candidate) log(label, 'candidate', e.candidate.type, e.candidate.protocol, e.candidate.address); else log(label, 'candidate gathering done'); });
+    pc.addEventListener('icegatheringstatechange', () => log(label, 'iceGatheringState', pc.iceGatheringState));
+  } else {
+    log(label, 'no peerConnection yet');
+    setTimeout(() => { const pc2 = conn.peerConnection; if (pc2) log(label, 'pc later signalingState', pc2.signalingState, 'ice', pc2.iceConnectionState); }, 3000);
+  }
+}
+document.getElementById('btn-host').addEventListener('click', () => {
+  const code = String(Math.floor(100000 + Math.random()*900000));
+  const id = 'slashshare-code-' + code;
+  document.getElementById('code-out').textContent = code;
+  peer = new Peer(id);
+  peer.on('open', pid => log('HOST', 'peer OPEN id=' + pid));
+  peer.on('error', e => log('HOST', 'peer ERROR', e.type, e.message));
+  peer.on('connection', conn => {
+    log('HOST', 'peer CONNECTION from ' + conn.peer);
+    watchConn(conn, 'HOST');
+  });
+  peer.on('disconnected', () => log('HOST', 'peer DISCONNECTED'));
+});
+document.getElementById('btn-join').addEventListener('click', () => {
+  const code = document.getElementById('join-code').value.trim();
+  peer = new Peer('slashshare-code-recv-' + Math.random().toString(36).slice(2,12));
+  peer.on('open', pid => {
+    log('JOIN', 'peer OPEN id=' + pid);
+    const conn = peer.connect('slashshare-code-' + code, { reliable: true, metadata: { kind: 'file' } });
+    watchConn(conn, 'JOIN');
+  });
+  peer.on('error', e => log('JOIN', 'peer ERROR', e.type, e.message));
+  peer.on('disconnected', () => log('JOIN', 'peer DISCONNECTED'));
+});
+</script>
+</body>
+</html>
